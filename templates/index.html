@@ -35,7 +35,7 @@
                     </a>
                     
                     <a href="/profile" class="flex items-center space-x-2 text-gray-200 hover:text-white transition bg-gray-800/60 hover:bg-gray-800 px-3 py-1.5 rounded-xl border border-gray-700/50">
-                        <img src="{{ url_for('static', filename='uploads/' + (current_user_obj.profile_pic if current_user_obj and current_user_obj.profile_pic else 'default_avatar.png')) }}" alt="Profile" class="w-6 h-6 rounded-full object-cover border border-emerald-500">
+                        <img src="{{ url_for('get_profile_pic', username=current_user) }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
                         <span class="text-xs font-semibold">@{{ current_user }}</span>
                     </a>
 
