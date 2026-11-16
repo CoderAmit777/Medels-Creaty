@@ -1,0 +1,22 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database files
+instance/
+*.db
+*.sqlite3
+
+# Uploaded user files / media
+static/uploads/*
+!static/uploads/default_avatar.png
+
+# IDE specific files
+.vscode/
+.idea/
