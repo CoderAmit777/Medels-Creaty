@@ -114,7 +114,7 @@
                     <div id="slider-{{ post.id }}" class="image-slider flex overflow-x-auto snap-x snap-mandatory scroll-smooth">
                         {% for img in post.images %}
                         <div class="min-w-full w-full snap-start flex justify-center items-center bg-black">
-                            <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Post Image" class="max-h-[500px] w-full object-contain block">
+                            <img src="{{ url_for('get_post_image', image_id=img.id) }}" alt="Post Image" class="w-full h-auto object-cover">
                         </div>
                         {% endfor %}
                     </div>
