@@ -38,6 +38,7 @@ Medels-Creaty/
     ├── profile.html
     ├── activity.html
     └── ... (other views)
+```
 
 # 🚀 Medels-Creaty
 
@@ -49,3 +50,11 @@ Creaty empowers users to:
 * **Discover Real Problems:** Read through problem posts and challenges shared by others from different corners.
 * **Collaborate & Solve:** Share meaningful solutions, spark discussions, and contribute to innovative problem-solving.
 * **Learn & Grow:** Explore new concepts and insights introduced by other users through their solutions, building a community driven by creativity and curiosity.
+
+---
+
+## 👨‍💻 Author
+
+* **Name:** Amit Das  
+* **GitHub:** [@CoderAmit777](https://github.com/CoderAmit777)  
+* **Role:** Full-Stack Developer & Creator
