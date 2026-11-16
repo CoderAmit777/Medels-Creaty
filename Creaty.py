@@ -15,7 +15,13 @@ app = Flask(__name__)
 
 # --- Configurations ---
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'creaty-session-secret-key-2026')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+
+# Neon (PostgreSQL) বা লোকাল SQLite এর জন্য ডায়নামিক ইউআরআই
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///data.db')
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'creaty-jwt-super-secret-key-2026')
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
