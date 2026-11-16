@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@{{ user.username }}'s Profile | Creaty</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #090d0a; color: #cbd5e1; line-height: 1.6; }
+        
+        nav { background: #111813; border-bottom: 1px solid #1e2920; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 700; color: #ffffff; text-decoration: none; }
+        .logo span { color: #10b981; }
+        .back-btn { color: #10b981; text-decoration: none; font-weight: 600; font-size: 14px; background: #0f261c; padding: 6px 14px; border-radius: 6px; border: 1px solid #143827; }
+
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        
+        .profile-card { background: #111813; border: 1px solid #1e2920; border-radius: 12px; padding: 30px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .profile-left { display: flex; align-items: center; gap: 20px; }
+        .profile-pic { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 2px solid #10b981; }
+        .profile-info h2 { color: #ffffff; font-size: 22px; margin-bottom: 4px; }
+        .profile-info p { color: #94a3b8; font-size: 14px; margin-bottom: 10px; }
+        
+        .profile-stats { display: flex; gap: 20px; font-size: 13px; color: #cbd5e1; }
+        .profile-stats b { color: #ffffff; }
+
+        .profile-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+        .star-badge { background: #1a150b; border: 1px solid #d97706; color: #fbbf24; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        
+        .follow-btn { background: #10b981; color: #090d0a; border: none; padding: 7px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+        .follow-btn:hover { background: #059669; color: #ffffff; }
+        .follow-btn.unfollow { background: #1e2920; color: #cbd5e1; border: 1px solid #2a3b2e; }
+        .follow-btn.unfollow:hover { background: #2d1212; color: #f87171; border-color: #ef4444; }
+
+        .section-title { color: #ffffff; font-size: 18px; margin: 30px 0 15px 0; border-bottom: 1px solid #1e2920; padding-bottom: 8px; }
+        .post-card { background: #111813; border: 1px solid #1e2920; border-radius: 10px; padding: 18px; margin-bottom: 15px; }
+        .post-card h4 { color: #ffffff; margin-bottom: 6px; font-size: 17px; }
+        .post-card p { color: #94a3b8; font-size: 14px; margin-bottom: 12px; }
+        
+        .profile-post-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px; margin-bottom: 12px; border: 1px solid #223026; }
+        .visit-post-link { display: inline-block; background: #0f261c; border: 1px solid #143827; color: #10b981; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; text-decoration: none; }
+        .visit-post-link:hover { background: #10b981; color: #090d0a; }
+
+        footer { text-align: center; padding: 30px; color: #64748b; font-size: 13px; border-top: 1px solid #1e2920; margin-top: 50px; background: #111813; }
+        footer span { font-weight: 700; color: #10b981; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" class="logo">Creaty<span>.</span></a>
+        <a href="/" class="back-btn">← Back to Feed</a>
+    </nav>
+
+    <div class="container">
+
+        <div class="profile-card">
+            <div class="profile-left">
+                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Avatar" class="profile-pic">
+                <div class="profile-info">
+                    <h2>@{{ user.username }}</h2>
+                    <p>{{ user.bio }}</p>
+                    <div class="profile-stats">
+                        <span><b>{{ posts | length }}</b> Posts</span>
+                        <a href="/profile/{{ user.username }}/followers" style="color: inherit; text-decoration: none;"><span><b>{{ followers_count }}</b> Followers</span></a>
+                        <a href="/profile/{{ user.username }}/following" style="color: inherit; text-decoration: none;"><span><b>{{ following_count }}</b> Following</span></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-right">
+                <div class="star-badge" title="Total Verified Solutions">
+                    ⭐ {{ verified_stars_count }} Stars
+                </div>
+                
+                {% if current_user %}
+                    <form action="/follow/{{ user.username }}" method="POST">
+                        {% if is_following %}
+                            <button type="submit" class="follow-btn unfollow">Unfollow</button>
+                        {% else %}
+                            <button type="submit" class="follow-btn">Follow</button>
+                        {% endif %}
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <h3 class="section-title">Posts by @{{ user.username }}</h3>
+        {% for post in posts %}
+            <div class="post-card">
+                <h4>{{ post.title }} <span style="font-size: 12px; color: #38bdf8; font-weight: normal;">{{ post.tags }}</span></h4>
+                <p>{{ post.qustion }}</p>
+                
+                {% if post.images %}
+                    <img src="{{ url_for('static', filename='uploads/' + post.images[0].filename) }}" alt="Post image" class="profile-post-img">
+                {% endif %}
+
+                <div>
+                    <a href="/#post-{{ post.id }}" class="visit-post-link">🔍 View Full Post & Discussions</a>
+                </div>
+            </div>
+        {% else %}
+            <p style="color: #64748b;">This user has not published any posts yet.</p>
+        {% endfor %}
+
+    </div>
+
+    <footer>
+        <p>Creaty &bull; An Application by <span>Medels</span></p>
+    </footer>
+
+</body>
+</html>
