@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session, make_response, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, make_response, flash, jsonify,send_file
+import io
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, 
@@ -93,6 +94,7 @@ class suply(db.Model):
 class PostImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(200), nullable=False)
+    image_data = db.Column(db.LargeBinary, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('suply.id'), nullable=False)
 
 class Comment(db.Model):
@@ -383,19 +385,28 @@ def create_post():
         )
         db.session.add(data)
         db.session.commit()
-        
+
         for file in request.files.getlist('images'):
-            if file and file.filename != '':
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                image_record = PostImage(filename=filename, post_id=data.id)
-                db.session.add(image_record)
-        db.session.commit()
-        
-        return redirect('/')
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    file_bytes = file.read()
+
+                    image_record = PostImage(
+                        filename=filename,
+                        image_data=file_bytes,
+                        post_id=data.id
+                    )
+                    db.session.add(image_record)
+
+                db.session.commit()
+                return redirect('/')
         
     return render_template('create_post.html', current_user=current_username)
 
+@app.route('/post-image/<int:image_id>')
+def get_post_image(image_id):
+    img = PostImage.query.get_or_404(image_id)
+    return send_file(io.BytesIO(img.image_data), mimetype='image/jpeg')
 
 @app.route('/delete-post/<int:post_id>', methods=['POST'])
 @jwt_required()
