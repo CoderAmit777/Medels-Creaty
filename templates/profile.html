@@ -55,7 +55,7 @@
 
         <div class="profile-card">
             <div class="profile-left">
-                <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Avatar" class="profile-pic">
+                <img src="{{ url_for('get_profile_pic', username=user.username) }}" alt="Avatar" class="profile-pic">
                 <div class="profile-info">
                     <h2>@{{ user.username }}</h2>
                     <p>{{ user.bio }}</p>
