@@ -4,4 +4,4 @@ Flask-JWT-Extended
 Flask-Mail
 Werkzeug
 gunicorn
-psycopg2-binary
+psycopg[binary]
