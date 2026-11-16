@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Creaty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Navbar -->
+    <nav class="bg-[#111827] border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-emerald-400 tracking-wider">Creaty</a>
+            <a href="/" class="text-xs text-gray-400 hover:text-white transition">← Back to Feed</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-xl mx-auto px-4 py-8 w-full flex-grow">
+        <div class="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-xl">
+            <h1 class="text-lg font-bold text-white mb-6 border-b border-gray-800 pb-3">{{ title }}</h1>
+
+            {% if users %}
+            <div class="space-y-4">
+                {% for u in users %}
+                <div class="flex items-center justify-between p-3 bg-[#0b0f19] border border-gray-800 rounded-xl hover:border-emerald-500/50 transition">
+                    <a href="/profile/{{ u.username }}" class="flex items-center space-x-3 flex-grow">
+                        <img src="{{ url_for('static', filename='uploads/' + (u.profile_pic if u.profile_pic else 'default_avatar.png')) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-emerald-500">
+                        <div>
+                            <div class="text-sm font-bold text-white hover:text-emerald-400 transition">@{{ u.username }}</div>
+                            <div class="text-xs text-gray-400 truncate max-w-[200px] sm:max-w-xs">{{ u.bio }}</div>
+                        </div>
+                    </a>
+
+                    <!-- Follow / Unfollow Button -->
+                    {% if current_user and current_user != u.username %}
+                    <form action="/follow/{{ u.username }}" method="POST">
+                        {% set is_flw = user_follow_status and user_follow_status.get(u.username) %}
+                        <button type="submit" class="px-4 py-1.5 rounded-xl text-xs font-semibold transition {% if is_flw %}bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700{% else %}bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20{% endif %}">
+                            {% if is_flw %}Following{% else %}Follow{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <p class="text-gray-400 text-sm">No users found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#111827] border-t border-gray-800 text-center py-5 text-xs text-gray-500 mt-12">
+        Creaty • An Application by Medels
+    </footer>
+</body>
+</html>
