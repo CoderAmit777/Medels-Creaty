@@ -70,7 +70,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=True)
     password = db.Column(db.String(200), nullable=False)
     bio = db.Column(db.String(300), default="Hey there! I am using Creaty.")
-    profile_pic = db.Column(db.String(200), default="default_avatar.png")
+    profile_pic_data = db.Column(db.LargeBinary, nullable=True)
 
 class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -300,6 +300,13 @@ def login():
             
     return render_template('login.html')
 
+# --- Profile Picture Route ---
+@app.route('/profile-pic/<username>')
+def get_profile_pic(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    if user.profile_pic_data:
+        return send_file(io.BytesIO(user.profile_pic_data), mimetype='image/jpeg')
+    return redirect(url_for('static', filename='default_avatar.png'))
 
 # --- Forgot Password with OTP Routes ---
 
@@ -637,9 +644,7 @@ def edit_profile():
 
         pic_file = request.files.get('profile_pic')
         if pic_file and pic_file.filename != '':
-            filename = secure_filename(pic_file.filename)
-            pic_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            user.profile_pic = filename
+            user.profile_pic_data = pic_file.read()
 
         if new_username != user.username:
             if User.query.filter_by(username=new_username).first():
