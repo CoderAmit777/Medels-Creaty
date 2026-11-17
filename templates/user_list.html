@@ -29,8 +29,7 @@
                 {% for u in users %}
                 <div class="flex items-center justify-between p-3 bg-[#0b0f19] border border-gray-800 rounded-xl hover:border-emerald-500/50 transition">
                     <a href="/profile/{{ u.username }}" class="flex items-center space-x-3 flex-grow">
-                        <img src="{{ url_for('static', filename='uploads/' + (u.profile_pic if u.profile_pic else 'default_avatar.png')) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-emerald-500">
-                        <div>
+                        <img src="/profile-pic/{{ u.username }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-emerald-500 flex-shrink-0">
                             <div class="text-sm font-bold text-white hover:text-emerald-400 transition">@{{ u.username }}</div>
                             <div class="text-xs text-gray-400 truncate max-w-[200px] sm:max-w-xs">{{ u.bio }}</div>
                         </div>
