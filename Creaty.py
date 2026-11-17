@@ -203,7 +203,10 @@ def Home():
 
 @app.route('/api/search-users', methods=['GET'])
 def api_search_users():
-    query = request.args.get('q', '').strip()
+    # 'q' অথবা 'username' দুটো থেকেই কুয়েরি রিসিভ করতে পারবে
+    query = request.args.get('q', '') or request.args.get('username', '')
+    query = query.strip()
+    
     users_data = []
     if query:
         matched_users = User.query.filter(User.username.ilike(f'%{query}%')).limit(6).all()
