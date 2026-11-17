@@ -203,20 +203,22 @@ def Home():
 
 @app.route('/api/search-users', methods=['GET'])
 def api_search_users():
-    # 'q' অথবা 'username' দুটো থেকেই কুয়েরি রিসিভ করতে পারবে
-    query = request.args.get('q', '') or request.args.get('username', '')
-    query = query.strip()
-    
-    users_data = []
-    if query:
-        matched_users = User.query.filter(User.username.ilike(f'%{query}%')).limit(6).all()
-        for u in matched_users:
-            users_data.append({
-                'username': u.username,
-                'profile_pic': u.profile_pic if u.profile_pic else 'default_avatar.png',
-                'bio': u.bio
-            })
-    return jsonify(users_data)
+    try:
+        query = request.args.get('q', '') or request.args.get('username', '')
+        query = query.strip()
+        
+        users_data = []
+        if query:
+            matched_users = User.query.filter(User.username.ilike(f'%{query}%')).limit(6).all()
+            for u in matched_users:
+                users_data.append({
+                    'username': u.username,
+                    'bio': u.bio if u.bio else ''
+                })
+        return jsonify(users_data), 200
+    except Exception as e:
+        print(f"Error in search suggestions: {e}")
+        return jsonify([]), 500
 
 
 @app.route('/search-users', methods=['GET'])
