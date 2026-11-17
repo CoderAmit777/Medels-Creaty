@@ -246,6 +246,27 @@ def search_users():
         user_follow_status=user_follow_status
     )
 
+@app.route('/api/search-hashtags', methods=['GET'])
+def api_search_hashtags():
+    query = request.args.get('q', '').strip()
+    hashtags_data = []
+    if query:
+        clean_query = query.lstrip('#')
+        # ডেটাবেস থেকে সুপ্লাই/পোস্টের ট্যাগ ফিল্টার করা
+        matched_posts = suply.query.filter(suply.tags.ilike(f'%{clean_query}%')).limit(6).all()
+        
+        seen_tags = set()
+        for post in matched_posts:
+            if post.tags:
+                # যদি ট্যাগগুলো কমা বা স্পেস দিয়ে আলাদা করা থাকে, সেগুলোকে স্প্লিট করে নেওয়া
+                tags_list = [t.strip() for t in post.tags.replace(',', ' ').split()]
+                for tag in tags_list:
+                    tag_with_hash = f"#{tag.lstrip('#')}"
+                    if clean_query.lower() in tag_with_hash.lower() and tag_with_hash not in seen_tags:
+                        seen_tags.add(tag_with_hash)
+                        hashtags_data.append({'hashtag': tag_with_hash})
+                        
+    return jsonify(hashtags_data[:6])
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -716,6 +737,9 @@ def view_profile(username):
     except Exception:
         current_user = None
 
+    if not current_user:
+        return redirect('/login')
+    
     if current_user == username:
         return redirect('/profile')
         
