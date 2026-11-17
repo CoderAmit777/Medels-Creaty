@@ -54,7 +54,7 @@ Creaty empowers users to:
 ## 🌐 Join & Support Creaty
 Creaty is a growing social and collaboration ecosystem built for creative minds. Whether you want to share real-world challenges, spark innovative discussions, or support the community, jump right into the live platform here:
 
-👉 **[Join Creaty Social Platform](https://medels-creaty.onrender.com)**
+👉 [**Join Creaty Social Platform**](https://medels-creaty.onrender.com)
 ---
 
 ## 👨‍💻 Author
