@@ -55,6 +55,8 @@ Creaty empowers users to:
 Creaty is a growing social and collaboration ecosystem built for creative minds. Whether you want to share real-world challenges, spark innovative discussions, or support the community, jump right into the live platform here:
 
 👉 [**Join Creaty Social Platform**](https://medels-creaty.onrender.com)
+
+> 💡 **Note on Server Startup:** Since this application is hosted on a free cloud infrastructure, the server may occasionally spin down due to inactivity. If the page takes a few seconds to load initially, **please don't panic and wait 15–30 seconds** while the server wakes up!
 ---
 
 ## 👨‍💻 Author
