@@ -401,32 +401,40 @@ def reset_password():
         
     if request.method == 'POST':
         action = request.form.get('action')
+        username = session.get('reset_username')
         
-        # ইউজার যদি 'Skip' বাটনে ক্লিক করে
-        if action == 'skip':
+        if not username:
+            return redirect('/forgot-password')
+            
+        # ইউজার যদি 'Skip' অথবা 'Update Password' যেটাই করুক না কেন, 
+        # আমরা তাকে সরাসরি অটো-লগইন করিয়ে হোমপেজে পাঠিয়ে দেব
+        if action in ['skip', 'reset']:
+            
+            # যদি 'reset' হয়, তবে ডেটাবেজে নতুন পাসওয়ার্ড সেভ করব
+            if action == 'reset':
+                new_password = request.form.get('new_password')
+                if new_password:
+                    user = User.query.filter_by(username=username).first()
+                    if user:
+                        user.password = generate_password_hash(new_password)
+                        db.session.commit()
+            
+            # সেশন ক্লিন করে দিচ্ছি
             session.pop('otp_verified', None)
             session.pop('reset_username', None)
-            flash('Skipped password reset. Please log in.', 'info')
-            return redirect('/login')
+            session.pop('reset_otp', None)
             
-        # ইউজার যদি 'Update Password' বাটনে ক্লিক করে
-        elif action == 'reset':
-            new_password = request.form.get('new_password')
-            username = session.get('reset_username')
+            # --- সরাসরি অটো-লগইন টোকেন তৈরি এবং কুকি সেট করা ---
+            access_token = create_access_token(identity=username)
+            response = make_response(redirect('/'))  # সরাসরি হোমপেজে চলে যাবে
+            set_access_cookies(response, access_token)
             
-            if new_password and username:
-                # ডেটাবেজ থেকে ইউজার খুঁজে বের করে পাসওয়ার্ড আপডেট করা
-                user = User.query.filter_by(username=username).first()
-                if user:
-                    user.password = generate_password_hash(new_password)
-                    db.session.commit()
+            if action == 'reset':
+                flash('Password updated successfully! Welcome to your account.', 'success')
+            else:
+                flash('Skipped password reset. Welcome back!', 'info')
                 
-                # সেশন ক্লিন করে দেওয়া
-                session.pop('otp_verified', None)
-                session.pop('reset_username', None)
-                
-                flash('Password updated successfully! Please login.', 'success')
-                return redirect('/login')
+            return response
                 
     return render_template('reset_password.html', username=session.get('reset_username'))
 
