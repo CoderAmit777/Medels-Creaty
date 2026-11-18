@@ -354,27 +354,29 @@ def forgot_password():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         user = User.query.filter_by(username=username).first()
-        
+
         if not user:
             return render_template('forgot_password.html', error="User not found with this username.")
-            
+
         if not user.email:
-            return render_template('forgot_password.html', error="Sorry, email can't be added / No email linked to this account.")
-            
+            return render_template('forgot_password.html', error="Sorry, no email linked to this account.")
+
         # Generate 6 digit OTP
         otp = str(random.randint(100000, 999999))
         session['reset_otp'] = otp
         session['reset_username'] = user.username
-        
+
         try:
-            msg = Message('Password Reset OTP - Creaty', sender=app.config['MAIL_USERNAME'], recipients=[user.email])
-            msg.body = f"Hello @{user.username},\n\nYour OTP for logging into Creaty is: {otp}\n\nIf you didn't request this, please ignore this email."
+            # তোমার এই কনফিগ অনুযায়ী Flask-Mail দিয়ে মেইল পাঠানোর কোড
+            msg = Message('Password Reset OTP - Creaty', recipients=[user.email])
+            msg.body = f"Hello @{user.username},\n\nYour OTP for logging into Creaty is: {otp}\n\nIf you didn't request this, please ignore this mail."
             mail.send(msg)
-        except Exception as e:
-            return render_template('forgot_password.html', error=f"Failed to send email. Check SMTP settings.")
             
-        return redirect('/verify-otp')
-        
+        except Exception as e:
+            return render_template('forgot_password.html', error=f"Failed to send email. Error: {str(e)}")
+
+        return redirect(url_for('verify_otp'))
+
     return render_template('forgot_password.html')
 
 
