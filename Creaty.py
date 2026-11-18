@@ -405,26 +405,30 @@ def reset_password():
         # ইউজার যদি 'Skip' বাটনে ক্লিক করে
         if action == 'skip':
             session.pop('otp_verified', None)
-            session.pop('reset_otp', None)
+            session.pop('reset_username', None)
             flash('Skipped password reset. Please log in.', 'info')
-            return redirect(url_for('login'))
+            return redirect('/login')
             
         # ইউজার যদি 'Update Password' বাটনে ক্লিক করে
         elif action == 'reset':
             new_password = request.form.get('new_password')
+            username = session.get('reset_username')
             
-            # TODO: এখানে তোমার ডেটাবেজ লজিক বসবে (যেমন পাসওয়ার্ড হ্যাশ করে আপডেট করা)
-            # user = User.query.filter_by(email=session.get('reset_email')).first()
-            # user.password = generate_password_hash(new_password)
-            # db.session.commit()
-            
-            session.pop('otp_verified', None)
-            session.pop('reset_otp', None)
-            
-            flash('Password updated successfully! Please login.', 'success')
-            return redirect(url_for('login'))
-            
-    return render_template('reset_password.html')
+            if new_password and username:
+                # ডেটাবেজ থেকে ইউজার খুঁজে বের করে পাসওয়ার্ড আপডেট করা
+                user = User.query.filter_by(username=username).first()
+                if user:
+                    user.password = generate_password_hash(new_password)
+                    db.session.commit()
+                
+                # সেশন ক্লিন করে দেওয়া
+                session.pop('otp_verified', None)
+                session.pop('reset_username', None)
+                
+                flash('Password updated successfully! Please login.', 'success')
+                return redirect('/login')
+                
+    return render_template('reset_password.html', username=session.get('reset_username'))
 
 @app.route('/verify-otp', methods=['GET', 'POST'])
 def verify_otp():
@@ -434,18 +438,19 @@ def verify_otp():
     if request.method == 'POST':
         entered_otp = request.form.get('otp', '').strip()
         if entered_otp == session.get('reset_otp'):
+           
             username = session.pop('reset_username')
             session.pop('reset_otp', None)
             
-            access_token = create_access_token(identity=username)
-            response = make_response(redirect('/'))
-            set_access_cookies(response, access_token)
-            return response
+            session['otp_verified'] = True
+            session['reset_username'] = username 
+            
+           
+            return redirect(url_for('reset_password'))
         else:
             return render_template('verify_otp.html', error="Invalid OTP. Please try again.")
             
     return render_template('verify_otp.html')
-
 
 @app.route('/logout')
 def logout():
