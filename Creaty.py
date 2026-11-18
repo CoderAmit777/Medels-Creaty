@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, make_response, flash, jsonify,send_file
 import io
+import requests
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import (
     JWTManager, create_access_token, jwt_required, 
@@ -39,17 +40,30 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
-# --- Flask-Mail Configuration ---
-app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = ('Creaty Support', 'creatysupport@gmail.com')
-mail = Mail(app)
 
-
+def send_otp_email(to_email, otp_code):
+    url = "https://api.brevo.com/v3/smtp/email"
+    
+    payload = {
+        "sender": {"name": "Creaty Support", "email": "creatysupport@gmail.com"},
+        "to": [{"email": to_email}],
+        "subject": "Password Reset OTP - Creaty",
+        "htmlContent": f"<html><body><h3>Your OTP code is: <b>{otp_code}</b></h3><p>Use this code to reset your password.</p></body></html>"
+    }
+    
+    headers = {
+        "accept": "application/json",
+        "api-key": os.environ.get("BREVO_API_KEY"),
+        "content-type": "application/json"
+    }
+    
+    try:
+        # timeout=10 দেওয়াটা খুব জরুরি যাতে সার্ভার হ্যাং না হয়ে যায়
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        return response.status_code == 201
+    except Exception as e:
+        print(f"Email sending error: {str(e)}")
+        return False
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -348,7 +362,6 @@ def get_profile_pic(username):
     return redirect(url_for('static', filename='default_avatar.png'))
 
 # --- Forgot Password with OTP Routes ---
-
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -367,18 +380,18 @@ def forgot_password():
         session['reset_username'] = user.username
 
         try:
-            # তোমার এই কনফিগ অনুযায়ী Flask-Mail দিয়ে মেইল পাঠানোর কোড
-            msg = Message('Password Reset OTP - Creaty', recipients=[user.email])
-            msg.body = f"Hello @{user.username},\n\nYour OTP for logging into Creaty is: {otp}\n\nIf you didn't request this, please ignore this mail."
-            mail.send(msg)
+            # Brevo HTTP API দিয়ে মেইল পাঠানোর ফাংশন কল করা হচ্ছে
+            success = send_otp_email(user.email, otp)
             
+            if not success:
+                return render_template('forgot_password.html', error="Failed to send email. Check API key.")
+                
         except Exception as e:
-            return render_template('forgot_password.html', error=f"Failed to send email. Error: {str(e)}")
+            return render_template('forgot_password.html', error=f"An error occurred: {str(e)}")
 
         return redirect(url_for('verify_otp'))
 
     return render_template('forgot_password.html')
-
 
 @app.route('/verify-otp', methods=['GET', 'POST'])
 def verify_otp():
