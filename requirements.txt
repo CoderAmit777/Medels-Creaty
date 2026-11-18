@@ -1,5 +1,6 @@
 Flask
 Flask-SQLAlchemy
+requests
 Flask-JWT-Extended
 Flask-Mail
 Werkzeug
