@@ -393,6 +393,39 @@ def forgot_password():
 
     return render_template('forgot_password.html')
 
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    # সিকিউরিটি চেক: ওটিপি ভেরিফাই না করে কেউ সরাসরি ঢুকতে পারবে না
+    if not session.get('otp_verified'):
+        return redirect(url_for('forgot_password'))
+        
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        # ইউজার যদি 'Skip' বাটনে ক্লিক করে
+        if action == 'skip':
+            session.pop('otp_verified', None)
+            session.pop('reset_otp', None)
+            flash('Skipped password reset. Please log in.', 'info')
+            return redirect(url_for('login'))
+            
+        # ইউজার যদি 'Update Password' বাটনে ক্লিক করে
+        elif action == 'reset':
+            new_password = request.form.get('new_password')
+            
+            # TODO: এখানে তোমার ডেটাবেজ লজিক বসবে (যেমন পাসওয়ার্ড হ্যাশ করে আপডেট করা)
+            # user = User.query.filter_by(email=session.get('reset_email')).first()
+            # user.password = generate_password_hash(new_password)
+            # db.session.commit()
+            
+            session.pop('otp_verified', None)
+            session.pop('reset_otp', None)
+            
+            flash('Password updated successfully! Please login.', 'success')
+            return redirect(url_for('login'))
+            
+    return render_template('reset_password.html')
+
 @app.route('/verify-otp', methods=['GET', 'POST'])
 def verify_otp():
     if 'reset_username' not in session:
